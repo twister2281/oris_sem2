@@ -1,15 +1,16 @@
 package com.example.demo;
 
-import com.example.demo.config.AppConfig;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.service.UserService;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+@SpringBootApplication
 public class OrisApplication {
     public static void main(String[] args) {
-        // Запуск
-        ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+        // Запуск Spring Boot приложения с веб-сервером и Actuator
+        ApplicationContext context = SpringApplication.run(OrisApplication.class, args);
         UserService service = context.getBean(UserService.class);
 
         // Инициализация
@@ -36,8 +37,5 @@ public class OrisApplication {
         System.out.println("\nУдаляем id=3:");
         service.delete(3L);
         service.getAll().forEach(System.out::println);
-
-        // Закрываем
-        ((AnnotationConfigApplicationContext) context).close();
     }
 }
