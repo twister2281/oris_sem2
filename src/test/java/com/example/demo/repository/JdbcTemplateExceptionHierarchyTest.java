@@ -57,15 +57,15 @@ class JdbcTemplateExceptionHierarchyTest {
     @Test
     void duplicatePrimaryKeyThrowsDuplicateKeyException() {
         namedParameterJdbcTemplate.update(
-                "INSERT INTO users (id, name) VALUES (:id, :name)",
-                Map.of("id", 1L, "name", "Alice")
+                "INSERT INTO users (id, name, status) VALUES (:id, :name, :status)",
+                Map.of("id", 1L, "name", "Alice", "status", "ACTIVE")
         );
 
         DuplicateKeyException exception = assertThrows(
                 DuplicateKeyException.class,
                 () -> namedParameterJdbcTemplate.update(
-                        "INSERT INTO users (id, name) VALUES (:id, :name)",
-                        Map.of("id", 1L, "name", "Bob")
+                        "INSERT INTO users (id, name, status) VALUES (:id, :name, :status)",
+                        Map.of("id", 1L, "name", "Bob", "status", "ACTIVE")
                 )
         );
 

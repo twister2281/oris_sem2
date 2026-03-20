@@ -1,64 +1,62 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.UserEntity;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 
 @Repository
+@Transactional(readOnly = true)
 public class UserRepository {
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
-
-    public UserRepository(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    private RowMapper<UserEntity> mapper = (rs, num) -> {
-        UserEntity u = new UserEntity();
-        u.setId(rs.getLong("id"));
-        u.setName(rs.getString("name"));
-        return u;
-    };
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public void createTable() {
-        jdbcTemplate.getJdbcTemplate().execute(
-                "CREATE TABLE IF NOT EXISTS users (id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))"
-        );
+        // Схема создается Hibernate автоматически через ddl-auto.
     }
 
+    @Transactional
     public void save(UserEntity user) {
-        jdbcTemplate.update(
-                "INSERT INTO users (name) VALUES (:name)",
-                Map.of("name", user.getName())
-        );
+        entityManager.persist(user);
     }
 
     public List<UserEntity> findAll() {
-        return jdbcTemplate.query("SELECT * FROM users", mapper);
+        return entityManager
+                .createQuery("select u from UserEntity u", UserEntity.class)
+                .getResultList();
     }
 
     public UserEntity findById(Long id) {
-        return jdbcTemplate.queryForObject(
-                "SELECT * FROM users WHERE id = :id",
-                Map.of("id", id),
-                mapper
-        );
+        UserEntity user = entityManager.find(UserEntity.class, id);
+        if (user == null) {
+            throw new EmptyResultDataAccessException(1);
+        }
+        return user;
     }
 
+    @Transactional
     public void update(UserEntity user) {
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", user.getId())
-                .addValue("name", user.getName());
-        jdbcTemplate.update("UPDATE users SET name = :name WHERE id = :id", params);
+        UserEntity existing = entityManager.find(UserEntity.class, user.getId());
+        if (existing == null) {
+            throw new EmptyResultDataAccessException(1);
+        }
+        existing.setName(user.getName());
+        if (user.getStatus() != null) {
+            existing.setStatus(user.getStatus());
+        }
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        jdbcTemplate.update("DELETE FROM users WHERE id = :id", Map.of("id", id));
+        UserEntity existing = entityManager.find(UserEntity.class, id);
+        if (existing != null) {
+            entityManager.remove(existing);
+        }
     }
 }
 
