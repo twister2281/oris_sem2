@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional(readOnly = true)
@@ -39,6 +40,23 @@ public class UserRepository {
         return user;
     }
 
+    public Optional<UserEntity> findByUsername(String username) {
+        List<UserEntity> users = entityManager
+                .createQuery("select u from UserEntity u where u.username = :username", UserEntity.class)
+                .setParameter("username", username)
+                .setMaxResults(1)
+                .getResultList();
+        return users.stream().findFirst();
+    }
+
+    public boolean existsByUsername(String username) {
+        Long count = entityManager
+                .createQuery("select count(u) from UserEntity u where u.username = :username", Long.class)
+                .setParameter("username", username)
+                .getSingleResult();
+        return count != null && count > 0;
+    }
+
     @Transactional
     public void update(UserEntity user) {
         UserEntity existing = entityManager.find(UserEntity.class, user.getId());
@@ -46,6 +64,12 @@ public class UserRepository {
             throw new EmptyResultDataAccessException(1);
         }
         existing.setName(user.getName());
+        if (user.getUsername() != null) {
+            existing.setUsername(user.getUsername());
+        }
+        if (user.getPasswordHash() != null) {
+            existing.setPasswordHash(user.getPasswordHash());
+        }
         if (user.getStatus() != null) {
             existing.setStatus(user.getStatus());
         }

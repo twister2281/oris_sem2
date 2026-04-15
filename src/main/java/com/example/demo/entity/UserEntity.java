@@ -26,6 +26,12 @@ public class UserEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(unique = true)
+    private String username;
+
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
@@ -58,6 +64,22 @@ public class UserEntity {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
     public UserStatus getStatus() {
         return status;
     }
@@ -86,6 +108,6 @@ public class UserEntity {
 
     @Override
     public String toString() {
-        return "User{id=" + id + ", name='" + name + "', status=" + status + ", tasks=" + tasks.size() + "}";
+        return "User{id=" + id + ", name='" + name + "', username='" + username + "', status=" + status + ", tasks=" + tasks.size() + "}";
     }
 }

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        form { max-width: 420px; display: grid; gap: 0.8rem; }
+        .error { color: #b00020; }
+        .success { color: #0a7a22; }
+        input { padding: 0.45rem; }
+        button { padding: 0.55rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+<h1>Вход</h1>
+
+<p class="success" th:if="${param.registered}">Аккаунт создан. Теперь выполните вход.</p>
+<p class="success" th:if="${param.logout}">Вы вышли из системы.</p>
+<p class="error" th:if="${param.error}">Неверный логин или пароль.</p>
+
+<form th:action="@{/login}" method="post">
+    <input type="text" name="username" placeholder="Логин" required>
+    <input type="password" name="password" placeholder="Пароль" required>
+    <button type="submit">Войти</button>
+</form>
+
+<p><a th:href="@{/register}">Нет аккаунта? Зарегистрироваться</a></p>
+</body>
+</html>
+
